@@ -1742,7 +1742,7 @@ class FieldDiagnostic(picmistandard.PICMI_FieldDiagnostic, WarpXDiagnosticBase):
         self.diagnostic.openpmd_backend = self.openpmd_backend
         self.diagnostic.file_min_digits = self.file_min_digits
         self.diagnostic.dump_rz_modes = self.dump_rz_modes
-        self.diagnostic.intervals = self.period
+        self.diagnostic.intervals = f'{self.step_min}:{self.step_max}:{self.period}'
         self.diagnostic.diag_lo = self.lower_bound
         self.diagnostic.diag_hi = self.upper_bound
         if self.number_of_cells is not None:
@@ -1918,7 +1918,7 @@ class ParticleDiagnostic(picmistandard.PICMI_ParticleDiagnostic, WarpXDiagnostic
         self.diagnostic.format = self.format
         self.diagnostic.openpmd_backend = self.openpmd_backend
         self.diagnostic.file_min_digits = self.file_min_digits
-        self.diagnostic.intervals = self.period
+        self.diagnostic.intervals = f'{self.step_min}:{self.step_max}:{self.period}'
 
         self.set_write_dir()
 
@@ -2027,7 +2027,7 @@ class LabFrameFieldDiagnostic(picmistandard.PICMI_LabFrameFieldDiagnostic,
         self.diagnostic.do_back_transformed_fields = 1
         self.diagnostic.num_snapshots_lab = self.num_snapshots
         self.diagnostic.dt_snapshots_lab = self.dt_snapshots
-        self.diagnostic.dz_snapshots_lab = self.dz_snapshots
+        # self.diagnostic.dz_snapshots_lab = self.dz_snapshots
         self.diagnostic.buffer_size = self.buffer_size
 
         # --- Use a set to ensure that fields don't get repeated.
@@ -2069,6 +2069,102 @@ class LabFrameFieldDiagnostic(picmistandard.PICMI_LabFrameFieldDiagnostic,
             self.diagnostic.fields_to_plot = fields_to_plot
 
         self.set_write_dir()
+
+class LabFrameParticleDiagnostic(picmistandard.PICMI_LabFrameParticleDiagnostic,
+                              WarpXDiagnosticBase):
+    """
+    See `Input Parameters <https://warpx.readthedocs.io/en/latest/usage/parameters.html>`_ for more information.
+
+    Parameters
+    ----------
+    warpx_format: string, optional
+        Passed to <diagnostic name>.format
+
+    warpx_openpmd_backend: string, optional
+        Passed to <diagnostic name>.openpmd_backend
+
+    warpx_file_prefix: string, optional
+        Passed to <diagnostic name>.file_prefix
+
+    warpx_file_min_digits: integer, optional
+        Passed to <diagnostic name>.file_min_digits
+
+    warpx_buffer_size: integer, optional
+        Passed to <diagnostic name>.buffer_size
+
+    warpx_lower_bound: vector of floats, optional
+        Passed to <diagnostic name>.lower_bound
+
+    warpx_upper_bound: vector of floats, optional
+        Passed to <diagnostic name>.upper_bound
+    """
+    def init(self, kw):
+        # The user is using the new BTD
+        self.format = kw.pop('warpx_format', None)
+        self.openpmd_backend = kw.pop('warpx_openpmd_backend', None)
+        self.file_prefix = kw.pop('warpx_file_prefix', None)
+        self.file_min_digits = kw.pop('warpx_file_min_digits', None)
+        self.buffer_size = kw.pop('warpx_buffer_size', None)
+        self.lower_bound = kw.pop('warpx_lower_bound', None)
+        self.upper_bound = kw.pop('warpx_upper_bound', None)
+
+    def initialize_inputs(self):
+
+        self.add_diagnostic()
+
+        self.diagnostic.diag_type = 'BackTransformed'
+        self.diagnostic.format = self.format
+        self.diagnostic.openpmd_backend = self.openpmd_backend
+        self.diagnostic.file_min_digits = self.file_min_digits
+        self.diagnostic.diag_lo = self.lower_bound
+        self.diagnostic.diag_hi = self.upper_bound
+
+        self.diagnostic.do_back_transformed_fields = 1
+        self.diagnostic.num_snapshots_lab = self.num_snapshots
+        self.diagnostic.dt_snapshots_lab = self.dt_snapshots
+        # self.diagnostic.dz_snapshots_lab = self.dz_snapshots
+        self.diagnostic.buffer_size = self.buffer_size
+
+        self.set_write_dir()        
+        
+# --- Use a set to ensure that fields don't get repeated.
+        variables = set()
+
+        if self.data_list is not None:
+            for dataname in self.data_list:
+                if dataname == 'position':
+                    # --- The positions are alway written out anyway
+                    pass
+                elif dataname == 'momentum':
+                    variables.add('ux')
+                    variables.add('uy')
+                    variables.add('uz')
+                elif dataname == 'weighting':
+                    variables.add('w')
+                elif dataname in ['ux', 'uy', 'uz']:
+                    variables.add(dataname)
+
+            # --- Convert the set to a sorted list so that the order
+            # --- is the same on all processors.
+            variables = list(variables)
+            variables.sort()
+
+        if np.iterable(self.species):
+            species_list = self.species
+        else:
+            species_list = [self.species]
+
+        # if self.mangle_dict is None:
+        #     # Only do this once so that the same variables are used in this distribution
+        #     # is used multiple times
+        #     self.mangle_dict = pywarpx.my_constants.add_keywords(self.user_defined_kw)
+
+        # for specie in species_list:
+        #     diag = pywarpx.Bucket.Bucket(self.name + '.' + specie.name,
+        #                                  variables = variables,
+        #                                  random_fraction = self.random_fraction,
+        #                                  uniform_stride = self.uniform_stride)
+        #     self.diagnostic._species_dict[specie.name] = diag
 
 class ReducedDiagnostic(picmistandard.base._ClassWithInit, WarpXDiagnosticBase):
     """
