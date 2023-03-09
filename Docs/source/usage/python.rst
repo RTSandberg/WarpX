@@ -102,6 +102,10 @@ ElectrostaticFieldDiagnostic
 
 Lab-frame diagnostics diagnostics are used when running boosted-frame simulations.
 
+LabFrameParticleDiagnostic
+"""""""""""""""""""""""
+.. autoclass:: pywarpx.picmi.LabFrameParticleDiagnostic
+
 LabFrameFieldDiagnostic
 """""""""""""""""""""""
 .. autoclass:: pywarpx.picmi.LabFrameFieldDiagnostic
