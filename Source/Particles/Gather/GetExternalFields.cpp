@@ -88,11 +88,15 @@ GetExternalEBField::GetExternalEBField (const WarpXParIter& a_pti, int a_offset)
         m_uy = attribs[PIdx::uy].dataPtr() + a_offset;
         m_uz = attribs[PIdx::uz].dataPtr() + a_offset;
         m_repeated_plasma_lens_period = mypc.m_repeated_plasma_lens_period;
-        m_n_lenses = static_cast<int>(mypc.h_repeated_plasma_lens_starts.size());
-        m_repeated_plasma_lens_starts = mypc.d_repeated_plasma_lens_starts.data();
-        m_repeated_plasma_lens_lengths = mypc.d_repeated_plasma_lens_lengths.data();
-        m_repeated_plasma_lens_strengths_E = mypc.d_repeated_plasma_lens_strengths_E.data();
-        m_repeated_plasma_lens_strengths_B = mypc.d_repeated_plasma_lens_strengths_B.data();
+        m_n_lenses = static_cast<int>(mypc.h_repeated_plasma_x_lens_starts.size());
+        m_repeated_plasma_x_lens_starts = mypc.d_repeated_plasma_x_lens_starts.data();
+        m_repeated_plasma_y_lens_starts = mypc.d_repeated_plasma_y_lens_starts.data();
+        m_repeated_plasma_x_lens_lengths = mypc.d_repeated_plasma_x_lens_lengths.data();
+        m_repeated_plasma_y_lens_lengths = mypc.d_repeated_plasma_y_lens_lengths.data();
+        m_repeated_plasma_lens_strengths_Ex = mypc.d_repeated_plasma_lens_strengths_Ex.data();
+        m_repeated_plasma_lens_strengths_Ey = mypc.d_repeated_plasma_lens_strengths_Ey.data();
+        m_repeated_plasma_lens_strengths_Bx = mypc.d_repeated_plasma_lens_strengths_Bx.data();
+        m_repeated_plasma_lens_strengths_By = mypc.d_repeated_plasma_lens_strengths_By.data();
     }
 
     WARPX_ALWAYS_ASSERT_WITH_MESSAGE(m_Etype != Unknown, "Unknown E_ext_particle_init_style");

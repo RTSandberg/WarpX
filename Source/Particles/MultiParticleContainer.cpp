@@ -235,44 +235,74 @@ MultiParticleContainer::ReadParameters ()
             WARPX_ALWAYS_ASSERT_WITH_MESSAGE(m_repeated_plasma_lens_period > 0._rt,
                                              "The period of the repeated plasma lens must be greater than zero");
             utils::parser::getArrWithParser(
-                pp_particles, "repeated_plasma_lens_starts",
-                h_repeated_plasma_lens_starts);
+                pp_particles, "repeated_plasma_x_lens_starts",
+                h_repeated_plasma_x_lens_starts);
             utils::parser::getArrWithParser(
-                pp_particles, "repeated_plasma_lens_lengths",
-                h_repeated_plasma_lens_lengths);
+                pp_particles, "repeated_plasma_y_lens_starts",
+                h_repeated_plasma_y_lens_starts);
+            utils::parser::getArrWithParser(
+                pp_particles, "repeated_plasma_x_lens_lengths",
+                h_repeated_plasma_x_lens_lengths);
+            utils::parser::getArrWithParser(
+                pp_particles, "repeated_plasma_y_lens_lengths",
+                h_repeated_plasma_y_lens_lengths);
 
-            int n_lenses = static_cast<int>(h_repeated_plasma_lens_starts.size());
-            d_repeated_plasma_lens_starts.resize(n_lenses);
-            d_repeated_plasma_lens_lengths.resize(n_lenses);
+            int n_lenses = static_cast<int>(h_repeated_plasma_x_lens_starts.size());
+            d_repeated_plasma_x_lens_starts.resize(n_lenses);
+            d_repeated_plasma_x_lens_lengths.resize(n_lenses);
+            d_repeated_plasma_y_lens_starts.resize(n_lenses);
+            d_repeated_plasma_y_lens_lengths.resize(n_lenses);
             amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
-                       h_repeated_plasma_lens_starts.begin(), h_repeated_plasma_lens_starts.end(),
-                       d_repeated_plasma_lens_starts.begin());
+                       h_repeated_plasma_x_lens_starts.begin(), h_repeated_plasma_x_lens_starts.end(),
+                       d_repeated_plasma_x_lens_starts.begin());
             amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
-                       h_repeated_plasma_lens_lengths.begin(), h_repeated_plasma_lens_lengths.end(),
-                       d_repeated_plasma_lens_lengths.begin());
+                       h_repeated_plasma_x_lens_lengths.begin(), h_repeated_plasma_x_lens_lengths.end(),
+                       d_repeated_plasma_x_lens_lengths.begin());
+            amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
+                       h_repeated_plasma_y_lens_starts.begin(), h_repeated_plasma_y_lens_starts.end(),
+                       d_repeated_plasma_y_lens_starts.begin());
+            amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
+                       h_repeated_plasma_y_lens_lengths.begin(), h_repeated_plasma_y_lens_lengths.end(),
+                       d_repeated_plasma_y_lens_lengths.begin());
 
-            h_repeated_plasma_lens_strengths_E.resize(n_lenses);
-            h_repeated_plasma_lens_strengths_B.resize(n_lenses);
+            h_repeated_plasma_lens_strengths_Ex.resize(n_lenses);
+            h_repeated_plasma_lens_strengths_Ey.resize(n_lenses);
+            h_repeated_plasma_lens_strengths_Bx.resize(n_lenses);
+            h_repeated_plasma_lens_strengths_By.resize(n_lenses);
 
             if (m_E_ext_particle_s == "repeated_plasma_lens") {
                 utils::parser::getArrWithParser(
-                    pp_particles, "repeated_plasma_lens_strengths_E",
-                    h_repeated_plasma_lens_strengths_E);
+                    pp_particles, "repeated_plasma_lens_strengths_Ex",
+                    h_repeated_plasma_lens_strengths_Ex);
+                utils::parser::getArrWithParser(
+                    pp_particles, "repeated_plasma_lens_strengths_Ey",
+                    h_repeated_plasma_lens_strengths_Ey);
             }
             if (m_B_ext_particle_s == "repeated_plasma_lens") {
                 utils::parser::getArrWithParser(
-                    pp_particles, "repeated_plasma_lens_strengths_B",
-                    h_repeated_plasma_lens_strengths_B);
+                    pp_particles, "repeated_plasma_lens_strengths_Bx",
+                    h_repeated_plasma_lens_strengths_Bx);
+                utils::parser::getArrWithParser(
+                    pp_particles, "repeated_plasma_lens_strengths_By",
+                    h_repeated_plasma_lens_strengths_By);
             }
 
-            d_repeated_plasma_lens_strengths_E.resize(n_lenses);
-            d_repeated_plasma_lens_strengths_B.resize(n_lenses);
+            d_repeated_plasma_lens_strengths_Ex.resize(n_lenses);
+            d_repeated_plasma_lens_strengths_Ey.resize(n_lenses);
+            d_repeated_plasma_lens_strengths_Bx.resize(n_lenses);
+            d_repeated_plasma_lens_strengths_By.resize(n_lenses);
             amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
-                       h_repeated_plasma_lens_strengths_E.begin(), h_repeated_plasma_lens_strengths_E.end(),
-                       d_repeated_plasma_lens_strengths_E.begin());
+                       h_repeated_plasma_lens_strengths_Ex.begin(), h_repeated_plasma_lens_strengths_Ex.end(),
+                       d_repeated_plasma_lens_strengths_Ex.begin());
             amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
-                       h_repeated_plasma_lens_strengths_B.begin(), h_repeated_plasma_lens_strengths_B.end(),
-                       d_repeated_plasma_lens_strengths_B.begin());
+                       h_repeated_plasma_lens_strengths_Ey.begin(), h_repeated_plasma_lens_strengths_Ey.end(),
+                       d_repeated_plasma_lens_strengths_Ey.begin());
+            amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
+                       h_repeated_plasma_lens_strengths_Bx.begin(), h_repeated_plasma_lens_strengths_Bx.end(),
+                       d_repeated_plasma_lens_strengths_Bx.begin());
+            amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
+                       h_repeated_plasma_lens_strengths_By.begin(), h_repeated_plasma_lens_strengths_By.end(),
+                       d_repeated_plasma_lens_strengths_By.begin());
 
             amrex::Gpu::synchronize();
         }

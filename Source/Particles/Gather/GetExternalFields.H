@@ -49,10 +49,14 @@ struct GetExternalEBField
     amrex::Real m_time;
 
     amrex::ParticleReal m_repeated_plasma_lens_period;
-    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_starts = nullptr;
-    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_lengths = nullptr;
-    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_strengths_E = nullptr;
-    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_strengths_B = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_x_lens_starts = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_y_lens_starts = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_x_lens_lengths = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_y_lens_lengths = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_strengths_Ex = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_strengths_Ey = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_strengths_Bx = nullptr;
+    const amrex::ParticleReal* AMREX_RESTRICT m_repeated_plasma_lens_strengths_By = nullptr;
     int m_n_lenses;
     amrex::Real m_dt;
     const amrex::ParticleReal* AMREX_RESTRICT m_ux = nullptr;
@@ -156,24 +160,29 @@ struct GetExternalEBField
             // This assumes that zl > 0.
             int i_lens = static_cast<int>(std::floor(zl/m_repeated_plasma_lens_period));
             i_lens = i_lens % m_n_lenses;
-            amrex::ParticleReal const lens_start = m_repeated_plasma_lens_starts[i_lens] + i_lens*m_repeated_plasma_lens_period;
-            amrex::ParticleReal const lens_end = lens_start + m_repeated_plasma_lens_lengths[i_lens];
+            amrex::ParticleReal const x_lens_start = m_repeated_plasma_x_lens_starts[i_lens] + i_lens*m_repeated_plasma_lens_period;
+            amrex::ParticleReal const y_lens_start = m_repeated_plasma_y_lens_starts[i_lens] + i_lens*m_repeated_plasma_lens_period;
+            amrex::ParticleReal const x_lens_end = x_lens_start + m_repeated_plasma_x_lens_lengths[i_lens];
+            amrex::ParticleReal const y_lens_end = y_lens_start + m_repeated_plasma_y_lens_lengths[i_lens];
 
             // Calculate the residence correction
             // frac will be 1 if the step is completely inside the lens, between 0 and 1
             // when entering or leaving the lens, and otherwise 0.
             // This accounts for the case when particles step over the element without landing in it.
             // This assumes that vzp > 0.
-            amrex::ParticleReal const zl_bounded = std::min(std::max(zl, lens_start), lens_end);
-            amrex::ParticleReal const zr_bounded = std::min(std::max(zr, lens_start), lens_end);
-            amrex::ParticleReal const frac = ((zr - zl) == 0._rt ? 1._rt : (zr_bounded - zl_bounded)/(zr - zl));
+            amrex::ParticleReal const x_lens_zl_bounded = std::min(std::max(zl, x_lens_start), x_lens_end);
+            amrex::ParticleReal const x_lens_zr_bounded = std::min(std::max(zr, x_lens_start), x_lens_end);
+            amrex::ParticleReal const x_lens_frac = ((zr - zl) == 0._rt ? 1._rt : (x_lens_zr_bounded - x_lens_zl_bounded)/(zr - zl));
+            amrex::ParticleReal const y_lens_zl_bounded = std::min(std::max(zl, y_lens_start), y_lens_end);
+            amrex::ParticleReal const y_lens_zr_bounded = std::min(std::max(zr, y_lens_start), y_lens_end);
+            amrex::ParticleReal const y_lens_frac = ((zr - zl) == 0._rt ? 1._rt : (y_lens_zr_bounded - y_lens_zl_bounded)/(zr - zl));
 
             // Note that "+=" is used since the fields may have been set above
             // if a different E or Btype was specified.
-            Ex += x*frac*m_repeated_plasma_lens_strengths_E[i_lens];
-            Ey += y*frac*m_repeated_plasma_lens_strengths_E[i_lens];
-            Bx += +y*frac*m_repeated_plasma_lens_strengths_B[i_lens];
-            By += -x*frac*m_repeated_plasma_lens_strengths_B[i_lens];
+            Ex += x*x_lens_frac*m_repeated_plasma_lens_strengths_Ex[i_lens];
+            Ey += y*y_lens_frac*m_repeated_plasma_lens_strengths_Ey[i_lens];
+            Bx += +y*y_lens_frac*m_repeated_plasma_lens_strengths_Bx[i_lens];
+            By += -x*x_lens_frac*m_repeated_plasma_lens_strengths_By[i_lens];
 
         }
 
