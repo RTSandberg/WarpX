@@ -22,25 +22,42 @@ void init_MultiParticleContainer (py::module& m)
         )
 
         .def("set_plasma_lens_strength",
-             [](MultiParticleContainer& mpc, int i_lens, amrex::Real strength_E, amrex::Real strength_B) {
+             [](MultiParticleContainer& mpc, 
+		int i_lens, 
+		amrex::Real strength_E, 
+		amrex::Real strength_B,
+		amrex::Real length,
+		amrex::Real start
+	       ) {
                  mpc.h_repeated_plasma_lens_strengths_E.at(i_lens) = strength_E;
                  mpc.h_repeated_plasma_lens_strengths_B.at(i_lens) = strength_B;
+		 mpc.h_repeated_plasma_lens_starts.at(i_lens) = start;
+		 mpc.h_repeated_plasma_lens_lengths.at(i_lens) = length;
                  amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
                                        mpc.h_repeated_plasma_lens_strengths_E.begin(), mpc.h_repeated_plasma_lens_strengths_E.end(),
                                        mpc.d_repeated_plasma_lens_strengths_E.begin());
                  amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
                                        mpc.h_repeated_plasma_lens_strengths_B.begin(), mpc.h_repeated_plasma_lens_strengths_B.end(),
                                        mpc.d_repeated_plasma_lens_strengths_B.begin());
+                 amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
+                                       mpc.h_repeated_plasma_lens_lengths.begin(), mpc.h_repeated_plasma_lens_lengths.end(),
+                                       mpc.d_repeated_plasma_lens_lengths.begin());
+                 amrex::Gpu::copyAsync(amrex::Gpu::hostToDevice,
+                                       mpc.h_repeated_plasma_lens_starts.begin(), mpc.h_repeated_plasma_lens_starts.end(),
+                                       mpc.d_repeated_plasma_lens_starts.begin());
                  amrex::Gpu::synchronize();
              },
              py::arg("i_lens"), py::arg("strength_E"), py::arg("strength_B"),
-             R"pbdoc(Set the strength of the `i_lens`-th lens
+	     py::arg("length"), py::arg("start"),
+             R"pbdoc(Set the strength, length, start of the `i_lens`-th lens
 Parameters
 ----------
 i_lens: int
   Index of the lens to be modified
 strength_E, strength_B: floats
-  The electric and magnetic focusing strength of the lens)pbdoc"
+  The electric and magnetic focusing strength of the lens
+length, start: floats
+  The length and starting position of the lens)pbdoc"
         )
     ;
 }
