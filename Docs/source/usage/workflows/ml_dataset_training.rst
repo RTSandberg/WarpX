@@ -33,7 +33,7 @@ the particle data is distributed in a single blob.
    Plot showing the final phase space projections of the training data for stage 1.
 
 This is as we expect and what is optimal for training neural networks.
-On the other hand, the final phase space for beam 0 has a halo of outlying particles.
+On the other hand, the final phase space for beam 0 has a spread of particles outside the central bunch.
 
 .. figure:: https://user-images.githubusercontent.com/10621396/290010282-40560ac4-8509-4599-82ca-167bb1739cff.png
    :alt: Plot comparing model prediction with simulation output.
@@ -103,7 +103,7 @@ openPMD to PyTorch Data
 With the data normalized, it must be stored in a form PyTorch recognizes.
 The openPMD data are 6 lists of arrays, for each of the 6 phase space coordinates
 :math:`x, y, z, p_x, p_y,` and :math:`p_z`.
-This data are converted to an :math:`N\times 6` numpy array and then to a PyTorch :math:`N\times 6` tensor.
+These data are converted to an :math:`N\times 6` numpy array and then to a PyTorch :math:`N\times 6` tensor.
 
 .. literalinclude:: ml_materials/create_dataset.py
    :language: python
@@ -132,7 +132,15 @@ just under 1000 nodes per layer.
 The example shown here uses 3 hidden layers and 20 nodes per layer
 and is trained for 10 epochs.
 
+A convenience wrapper for generating neural networks with the simplified structure we use here is provided in the following script:
 
+.. dropdown:: Python neural network structure convenience
+   :color: light
+   :icon: info
+   :animate: fade-in-slide-down
+
+    .. literalinclude:: ml_materials/neural_network_classes.py
+       :language: python3
 
 Train and Save Neural Network
 -----------------------------
